@@ -241,3 +241,4 @@ btnLoad.addEventListener('click', function () {
 btnReset.addEventListener('click', function () {
   resetForm();
 });
+
