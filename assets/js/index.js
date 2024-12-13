@@ -83,7 +83,7 @@ const retrieveArticles = function () {
         }
         const newProductCol = `
             <div class="col">
-                <div class="card">
+                <div class="card m-1">
                     <img src="${element.imageUrl}" class="card-img-top img-fluid" alt="...">
                     <div class="card-body text-center">
                         <h5 class="card-title">${element.name}</h5>
