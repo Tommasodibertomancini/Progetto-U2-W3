@@ -1,32 +1,35 @@
 const URL = 'https://striveschool-api.herokuapp.com/api/product/';
-const formTitle = document.getElementById('formTitle');
-const btnAdd = document.getElementById('btnAdd');
-const btnReset = document.getElementById('btnReset');
-const btnLoad = document.getElementById('btnLoad');
-const btnModify = document.getElementById('btnModify');
-const btnDelete = document.getElementById('btnDelete');
 const nameInput = document.getElementById('name');
 const descriptionInput = document.getElementById('description');
 const priceInput = document.getElementById('price');
 const brandInput = document.getElementById('brand');
 const imgUrlInput = document.getElementById('imageUrl');
+const btnAdd = document.getElementById('btnAdd');
+const btnReset = document.getElementById('btnReset');
+const btnLoad = document.getElementById('btnLoad');
+const btnModify = document.getElementById('btnModify');
+const btnDelete = document.getElementById('btnDelete');
+const formTitle = document.getElementById('formTitle');
+const carouselInner = document.getElementById('carousel');
 const btnSelect = document.getElementById('btnSelect');
-const carousel = document.getElementById('carousel');
-
 let id;
-let dataSelected;
-let data = []; // Array per contenere i prodotti caricati
 
-class myProduct {
-  constructor(_name, _description, _brand, _imageUrl, _price) {
-    this.name = _name;
-    this.description = _description;
-    this.brand = _brand;
-    this.imageUrl = _imageUrl;
-    this.price = _price;
-  }
+// Funzione per ottenere l'ID del prodotto dalla query string dell'URL
+function getProductIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('productId');
 }
 
+// Funzione per resettare il modulo
+function resetForm() {
+  nameInput.value = '';
+  descriptionInput.value = '';
+  priceInput.value = '';
+  brandInput.value = '';
+  imgUrlInput.value = '';
+}
+
+// Funzione per passare alla modalità di aggiunta
 function setAddMode() {
   formTitle.textContent = 'Add Product';
   btnAdd.classList.remove('d-none');
@@ -34,9 +37,9 @@ function setAddMode() {
   btnLoad.classList.add('d-none');
   btnModify.classList.add('d-none');
   btnDelete.classList.add('d-none');
-  resetForm();
 }
 
+// Funzione per passare alla modalità di modifica
 function setModifyMode() {
   formTitle.textContent = 'Modify Product';
   btnAdd.classList.add('d-none');
@@ -46,139 +49,191 @@ function setModifyMode() {
   btnDelete.classList.remove('d-none');
 }
 
-function resetForm() {
-  document.getElementById('productForm').reset();
-}
-
-btnSelect.addEventListener('click', function () {
-  const active = document.querySelector('div.active');
-  const imgSelected = active.querySelector('img');
-  const src = imgSelected.getAttribute('src');
-
-  dataSelected = data.find((product) => product.imageUrl === src);
-
-  if (dataSelected) {
-    nameInput.value = dataSelected.name;
-    descriptionInput.value = dataSelected.description;
-    priceInput.value = dataSelected.price;
-    brandInput.value = dataSelected.brand;
-    imgUrlInput.value = dataSelected.imageUrl;
-    id = dataSelected._id;
-    setModifyMode();
-  }
-});
-
-document.getElementById('productForm').addEventListener('submit', function (e) {
-  e.preventDefault();
-  const newProduct = new myProduct(
-    nameInput.value,
-    descriptionInput.value,
-    brandInput.value,
-    imgUrlInput.value,
-    priceInput.value
-  );
-
-  fetch(URL, {
-    method: 'POST',
-    body: JSON.stringify(newProduct),
+// Controlla se esiste un prodotto da modificare tramite la query string
+const productId = getProductIdFromUrl();
+if (productId) {
+  // Carica i dati del prodotto e imposta la modalità modifica
+  fetch(`${URL}${productId}`, {
     headers: {
-      'Content-Type': 'application/json',
       Authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzU4NzEyNDA3ZGI3MzAwMTU0MDYzYjAiLCJpYXQiOjE3MzQwNzU5MjIsImV4cCI6MTczNTI4NTUyMn0.8rdgKxrJ4EVjgPnzdJnv0DEA72DdiXgarU0XPJu0G30',
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzU4NzEyNDA3ZGI3MzAwMTU0MDYzYjAiLCJpYXQiOjE3MzQwNzU5MjIsImV4cCI6MTczNTI4NTUyMn0.8rdgKxrJ4EVjgPnzdJnv0DEA72DdiXgarU0XPJu0G30', // sostituisci con la tua chiave API
     },
   })
     .then((response) => {
       if (response.ok) {
-        alert('Product Added!');
-        window.location.reload();
+        return response.json();
       } else {
-        alert('Error adding product.');
+        throw new Error('Errore nel recupero del prodotto.');
+      }
+    })
+    .then((product) => {
+      nameInput.value = product.name;
+      descriptionInput.value = product.description;
+      priceInput.value = product.price;
+      brandInput.value = product.brand;
+      imgUrlInput.value = product.imageUrl;
+      id = product._id;
+      setModifyMode(); // Passa alla modalità di modifica
+    })
+    .catch((err) => {
+      console.error(err);
+      alert('Errore nel caricamento del prodotto.');
+    });
+} else {
+  // Passa in modalità aggiunta
+  setAddMode();
+}
+
+// Aggiungi un nuovo prodotto
+btnAdd.addEventListener('click', function (e) {
+  e.preventDefault();
+  const newProduct = {
+    name: nameInput.value,
+    description: descriptionInput.value,
+    price: priceInput.value,
+    brand: brandInput.value,
+    imageUrl: imgUrlInput.value,
+  };
+
+  fetch(URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization:
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzU4NzEyNDA3ZGI3MzAwMTU0MDYzYjAiLCJpYXQiOjE3MzQwNzU5MjIsImV4cCI6MTczNTI4NTUyMn0.8rdgKxrJ4EVjgPnzdJnv0DEA72DdiXgarU0XPJu0G30', // sostituisci con la tua chiave API
+    },
+    body: JSON.stringify(newProduct),
+  })
+    .then((response) => {
+      if (response.ok) {
+        alert('Prodotto aggiunto con successo!');
+        window.location.href = 'index.html';
+      } else {
+        throw new Error("Errore durante l'aggiunta del prodotto.");
       }
     })
     .catch((err) => console.error(err));
 });
 
-btnModify.addEventListener('click', function () {
-  if (id) {
-    const updatedProduct = new myProduct(
-      nameInput.value,
-      descriptionInput.value,
-      brandInput.value,
-      imgUrlInput.value,
-      priceInput.value
-    );
+// Modifica un prodotto esistente
+btnModify.addEventListener('click', function (e) {
+  e.preventDefault();
+  const updatedProduct = {
+    name: nameInput.value,
+    description: descriptionInput.value,
+    price: priceInput.value,
+    brand: brandInput.value,
+    imageUrl: imgUrlInput.value,
+  };
 
-    fetch(URL + id, {
-      method: 'PUT',
-      body: JSON.stringify(updatedProduct),
+  fetch(`${URL}${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization:
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzU4NzEyNDA3ZGI3MzAwMTU0MDYzYjAiLCJpYXQiOjE3MzQwNzU5MjIsImV4cCI6MTczNTI4NTUyMn0.8rdgKxrJ4EVjgPnzdJnv0DEA72DdiXgarU0XPJu0G30', // sostituisci con la tua chiave API
+    },
+    body: JSON.stringify(updatedProduct),
+  })
+    .then((response) => {
+      if (response.ok) {
+        alert('Prodotto modificato con successo!');
+        window.location.href = 'index.html'; // Reindirizza alla pagina principale dopo la modifica
+      } else {
+        throw new Error('Errore nella modifica del prodotto.');
+      }
+    })
+    .catch((err) => console.error(err));
+});
+
+// Elimina un prodotto
+btnDelete.addEventListener('click', function (e) {
+  e.preventDefault();
+  if (confirm('Sei sicuro di voler eliminare questo prodotto?')) {
+    fetch(`${URL}${id}`, {
+      method: 'DELETE',
       headers: {
-        'Content-Type': 'application/json',
         Authorization:
-          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzU4NzEyNDA3ZGI3MzAwMTU0MDYzYjAiLCJpYXQiOjE3MzQwNzU5MjIsImV4cCI6MTczNTI4NTUyMn0.8rdgKxrJ4EVjgPnzdJnv0DEA72DdiXgarU0XPJu0G30',
+          'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzU4NzEyNDA3ZGI3MzAwMTU0MDYzYjAiLCJpYXQiOjE3MzQwNzU5MjIsImV4cCI6MTczNTI4NTUyMn0.8rdgKxrJ4EVjgPnzdJnv0DEA72DdiXgarU0XPJu0G30', // sostituisci con la tua chiave API
       },
     })
       .then((response) => {
         if (response.ok) {
-          alert('Product Modified!');
-          window.location.reload();
+          alert('Prodotto eliminato con successo!');
+          window.location.href = 'index.html';
         } else {
-          alert('Error modifying product.');
+          throw new Error("Errore nell'eliminazione del prodotto.");
         }
       })
       .catch((err) => console.error(err));
-  } else {
-    alert('Select a product first!');
   }
 });
 
-btnDelete.addEventListener('click', function () {
-  if (id) {
-    if (confirm('Are you sure you want to delete this product?')) {
-      fetch(URL + id, {
-        method: 'DELETE',
-        headers: {
-          Authorization:
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzU4NzEyNDA3ZGI3MzAwMTU0MDYzYjAiLCJpYXQiOjE3MzQwNzU5MjIsImV4cCI6MTczNTI4NTUyMn0.8rdgKxrJ4EVjgPnzdJnv0DEA72DdiXgarU0XPJu0G30',
-        },
-      })
-        .then((response) => {
-          if (response.ok) {
-            alert('Product Deleted!');
-            window.location.reload();
-          } else {
-            alert('Error deleting product.');
-          }
-        })
-        .catch((err) => console.error(err));
-    }
-  } else {
-    alert('Select a product first!');
-  }
-});
-
-setAddMode();
-
-function displayCarousel(products) {
-  carousel.innerHTML = '';
-  products.forEach((product, index) => {
-    const activeClass = index === 0 ? 'active' : '';
-    carousel.innerHTML += `
-          <div class="carousel-item ${activeClass}">
-            <img src="${product.imageUrl}" class="d-block w-100" height="450" alt="${product.name}">
-          </div>`;
-  });
-}
-
-// Load products into the carousel
-fetch(URL, {
-  headers: {
-    Authorization:
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzU4NzEyNDA3ZGI3MzAwMTU0MDYzYjAiLCJpYXQiOjE3MzQwNzU5MjIsImV4cCI6MTczNTI4NTUyMn0.8rdgKxrJ4EVjgPnzdJnv0DEA72DdiXgarU0XPJu0G30',
-  },
-})
-  .then((response) => response.json())
-  .then((products) => {
-    data = products;
-    displayCarousel(products);
+// Ricarica i prodotti e visualizzali nel carosello
+btnLoad.addEventListener('click', function () {
+  fetch(URL, {
+    headers: {
+      Authorization:
+        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzU4NzEyNDA3ZGI3MzAwMTU0MDYzYjAiLCJpYXQiOjE3MzQwNzU5MjIsImV4cCI6MTczNTI4NTUyMn0.8rdgKxrJ4EVjgPnzdJnv0DEA72DdiXgarU0XPJu0G30', // sostituisci con la tua chiave API
+    },
   })
-  .catch((err) => console.error(err));
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error('Errore nel recupero dei prodotti.');
+      }
+    })
+    .then((products) => {
+      console.log(products);
+      if (products.length === 0) {
+        alert('Nessun prodotto disponibile!');
+        return;
+      }
+
+      // Pulisce il carosello prima di aggiungere nuovi prodotti
+      carouselInner.innerHTML = '';
+
+      // Aggiungi le immagini al carosello
+      products.forEach((product, index) => {
+        const isActive = index === 0 ? 'active' : ''; // Imposta la classe 'active' sulla prima immagine
+
+        const carouselItem = document.createElement('div');
+
+        // Aggiungi la classe 'carousel-item' e solo se isActive non è vuoto, aggiungi 'active'
+        carouselItem.classList.add('carousel-item');
+        if (isActive) {
+          carouselItem.classList.add(isActive);
+        }
+
+        const img = document.createElement('img');
+        img.src = product.imageUrl;
+        img.classList.add('d-block', 'w-100');
+        img.alt = product.name;
+
+        // Aggiungi un event listener per il click sull'immagine
+        img.addEventListener('click', function () {
+          // Reindirizza alla pagina backoffice.html con l'ID del prodotto
+          window.location.href = `backoffice.html?productId=${product._id}`;
+        });
+
+        carouselItem.appendChild(img);
+        carouselInner.appendChild(carouselItem);
+      });
+
+      // Mostra la modale con il carosello
+      const modal = new bootstrap.Modal(
+        document.getElementById('staticBackdrop')
+      );
+      modal.show();
+    })
+    .catch((err) => {
+      console.error(err);
+      alert('Errore nel caricamento dei prodotti.');
+    });
+});
+
+// Resetta il modulo
+btnReset.addEventListener('click', function () {
+  resetForm();
+});

@@ -90,7 +90,7 @@ const retrieveArticles = function () {
                         <h6 class="card-title">${element.brand}</h6>
                         <p class="card-text">${description}<span class='fw-bold'>${more}</span></p>
                         <a href="details.html?productId=${element._id}" class="btn w-50 btn-details">DETAILS</a>
-                        <a href="backoffice.html?productId=${element._id}" class="btn w-50 btn-edit">EDIT</a>
+                        <a href="backoffice.html?productId=${element._id}" class="btn w-50 btn-reset mt-2">EDIT</a>
                     </div>
                 </div>
             </div> `;
