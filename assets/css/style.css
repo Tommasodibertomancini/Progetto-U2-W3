@@ -1,0 +1,32 @@
+.header {
+background-color: #542581;
+
+}
+
+#logo {
+    width: 30%;
+    margin-left: 10px;
+}
+
+.header span, .header a {
+    color: #F5B327;
+}
+
+.header button {
+    background-color: #F5B327;
+    color: #542581;
+}
+
+.main {
+    color: #542581;
+}
+
+.btn-details {
+    background-color: #542581;
+    color: #F5B327;
+}
+
+.btn-reset {
+    background-color: #F5B327;
+    color: #542581;
+}
