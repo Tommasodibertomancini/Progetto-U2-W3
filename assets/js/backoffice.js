@@ -12,6 +12,7 @@ const btnDelete = document.getElementById('btnDelete');
 const formTitle = document.getElementById('formTitle');
 const carouselInner = document.getElementById('carousel');
 const btnSelect = document.getElementById('btnSelect');
+const btnCart = document.getElementById('btn-cart')
 let id;
 
 // Funzione per ottenere l'ID del prodotto dalla query string dell'URL
@@ -37,6 +38,7 @@ function setAddMode() {
   btnLoad.classList.add('d-none');
   btnModify.classList.add('d-none');
   btnDelete.classList.add('d-none');
+  btnCart.classList.add('d-none');
 }
 
 // Funzione per passare alla modalità di modifica
@@ -115,7 +117,6 @@ btnAdd.addEventListener('click', function (e) {
     .catch((err) => console.error(err));
 });
 
-// Modifica un prodotto esistente
 btnModify.addEventListener('click', function (e) {
   e.preventDefault();
   const updatedProduct = {
@@ -138,7 +139,7 @@ btnModify.addEventListener('click', function (e) {
     .then((response) => {
       if (response.ok) {
         alert('Prodotto modificato con successo!');
-        window.location.href = 'index.html'; // Reindirizza alla pagina principale dopo la modifica
+        window.location.href = 'index.html'; 
       } else {
         throw new Error('Errore nella modifica del prodotto.');
       }
@@ -211,17 +212,19 @@ btnLoad.addEventListener('click', function () {
         img.classList.add('d-block', 'w-100');
         img.alt = product.name;
 
-        // Aggiungi un event listener per il click sull'immagine
-        img.addEventListener('click', function () {
-          // Reindirizza alla pagina backoffice.html con l'ID del prodotto
+        const selectButton = document.createElement('button');
+        selectButton.textContent = 'Select';
+        selectButton.classList.add('btn', 'btn-details', 'btn-select');
+        selectButton.addEventListener('click', function () {
           window.location.href = `backoffice.html?productId=${product._id}`;
         });
 
         carouselItem.appendChild(img);
+        carouselItem.appendChild(selectButton);
         carouselInner.appendChild(carouselItem);
       });
 
-      // Mostra la modale con il carosello
+      
       const modal = new bootstrap.Modal(
         document.getElementById('staticBackdrop')
       );

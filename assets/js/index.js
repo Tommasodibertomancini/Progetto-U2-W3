@@ -42,7 +42,7 @@ const createCart = function (array) {
     return acc + element.price;
   }, 0);
   const totalShow = document.createElement('h5');
-  totalShow.innerText = `Il totale nel carrello è: ${total.toFixed(2)} $`;
+  totalShow.innerText = `Your total cart is: ${total.toFixed(2)} $`;
   cart.appendChild(totalShow);
 };
 
