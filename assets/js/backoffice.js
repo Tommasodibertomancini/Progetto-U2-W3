@@ -49,6 +49,7 @@ function setModifyMode() {
   btnLoad.classList.remove('d-none');
   btnModify.classList.remove('d-none');
   btnDelete.classList.remove('d-none');
+  btnCart.classList.add('d-none');
 }
 
 // Controlla se esiste un prodotto da modificare tramite la query string
